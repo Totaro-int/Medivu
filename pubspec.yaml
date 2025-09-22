@@ -1,0 +1,125 @@
+name: medivu_app
+description: "ActFinder - 소음 측정 및 번호판 인식 증거 수집 앱"
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # UI Icons
+  cupertino_icons: ^1.0.8
+
+  # 🔐 Google 로그인 (선택적)
+  # google_sign_in: ^7.1.1
+
+  # 📷 카메라 및 미디어
+  camera: ^0.11.2
+  image_picker: ^1.0.4
+  video_player: ^2.8.1
+  flutter_webrtc: any
+
+  # 🔊 소음 측정
+  noise_meter: ^5.0.2
+
+  # 📍 위치 서비스
+  geolocator: ^14.0.2
+  geocoding: ^4.0.0
+
+  # 🌐 네트워크 & API
+  http: ^1.1.0
+  dio: ^5.4.0
+
+  # 💾 로컬 저장소
+  shared_preferences: ^2.2.2
+  path_provider: ^2.1.1
+  path: ^1.8.3
+  sqflite: ^2.3.0
+
+  # 📄 파일 처리
+  file_picker: ^10.2.0
+
+  # 📋 PDF 생성
+  pdf: ^3.10.7
+  printing: ^5.11.1
+  open_file: ^3.3.2
+
+  # 🔒 권한 관리
+  permission_handler: ^12.0.1
+  petitparser: ^6.1.0
+  meta: any
+
+  # 🏗️ 상태 관리
+  provider: ^6.1.1
+
+  # 📊 차트 및 그래프
+  fl_chart: ^1.0.0
+  syncfusion_flutter_charts: ^30.1.41
+
+  # 🕒 날짜 및 시간
+  intl: ^0.20.2
+
+  # 🎨 UI 컴포넌트
+  flutter_spinkit: ^5.2.0
+  cached_network_image: ^3.3.0
+
+  # 📱 디바이스 정보
+  device_info_plus: ^11.5.0
+  package_info_plus: ^8.3.0
+
+  # 🔔 푸시 알림
+  # flutter_local_notifications: ^19.4.0  # Temporarily disabled due to ATL dependency
+
+  # 🛠️ 유틸리티
+  uuid: ^4.2.1
+  crypto: ^3.0.3
+
+  # 📧 URL 런처 (민원 포털 연결용)
+  url_launcher: ^6.2.2
+
+  # 🖼️ 이미지 처리
+  image: ^4.1.3
+
+  # 🔍 OCR 텍스트 인식 (번호판 인식용)
+  google_mlkit_text_recognition: ^0.14.0
+  flutter_tesseract_ocr: ^0.4.25
+  
+  # 🤖 TensorFlow Lite (온디바이스 ML) - 호환성 이슈로 주석처리
+  # tflite_flutter: ^0.9.0  # namespace 이슈
+  # tflite: ^1.1.2  # gradle 호환성 이슈
+  # 현재는 더미 구현으로 파이프라인 테스트
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+  # 🧪 테스트 도구
+  mockito: ^5.4.4
+  build_runner: ^2.4.7
+  sqflite_common_ffi: ^2.3.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/logo.png
+    - assets/models/
+
+  # 📝 한국어 폰트 추가 (번호판 인식 개선용)
+  # fonts:
+  #   - family: NotoSansKR
+  #     fonts:
+  #       - asset: assets/fonts/NotoSansKR-Regular.ttf
+  #       - asset: assets/fonts/NotoSansKR-Bold.ttf
+  #         weight: 700
+  #   - family: RobotoMono
+  #     fonts:
+  #       - asset: assets/fonts/RobotoMono-Regular.ttf
+  #       - asset: assets/fonts/RobotoMono-Bold.ttf
+  #         weight: 700
