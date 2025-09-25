@@ -469,7 +469,7 @@ class _ReportListScreenState extends State<ReportListScreen> {
                     const SizedBox(width: 8),
                     _buildMeasurementInfo('평균', '${report.recording.noiseData.avgDecibel?.toStringAsFixed(1) ?? '0.0'}dB', Colors.orange),
                     const SizedBox(width: 8),
-                    _buildMeasurementInfo('횟수', '${report.recording.noiseData.measurementCount ?? 0}회', Colors.blue),
+                    _buildMeasurementInfo('횟수', '${report.recording.noiseData.measurementCount}회', Colors.blue),
                   ],
                 ),
               ),

@@ -92,7 +92,7 @@ class _EnhancedAuthWrapperState extends State<EnhancedAuthWrapper>
   Future<void> _initializeApp() async {
     try {
       // Enhanced 데이터베이스 초기화 확인
-      final db = await EnhancedDatabaseHelper.instance.database;
+      await EnhancedDatabaseHelper.instance.database;
       print('✅ Enhanced 데이터베이스 초기화 완료');
       
       // Enhanced AuthProvider 초기화 (세션 복원 포함)

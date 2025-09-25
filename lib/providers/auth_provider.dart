@@ -297,14 +297,6 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 이메일에서 이름 추출 (임시 기능)
-  String _extractNameFromEmail(String email) {
-    final parts = email.split('@');
-    if (parts.isNotEmpty) {
-      return parts.first.replaceAll(RegExp(r'[^a-zA-Z가-힣]'), '');
-    }
-    return '사용자';
-  }
 
   /// 사용자 활동 기록 업데이트
   Future<void> updateLastActivity() async {

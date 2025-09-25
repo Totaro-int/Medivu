@@ -7,7 +7,7 @@ import '../../utils/ocr_performance_analyzer.dart';
 
 /// 한글 OCR 성능 테스트 화면
 class KoreanOCRTestScreen extends StatefulWidget {
-  const KoreanOCRTestScreen({Key? key}) : super(key: key);
+  const KoreanOCRTestScreen({super.key});
 
   @override
   State<KoreanOCRTestScreen> createState() => _KoreanOCRTestScreenState();
@@ -20,7 +20,7 @@ class _KoreanOCRTestScreenState extends State<KoreanOCRTestScreen> {
   String? _selectedImagePath;
   bool _isTestRunning = false;
   Map<String, dynamic>? _testResult;
-  List<String> _testLogs = [];
+  final List<String> _testLogs = [];
   OCRPerformanceReport? _performanceReport;
 
   @override

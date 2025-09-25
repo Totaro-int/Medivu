@@ -3,7 +3,7 @@ import 'package:camera/camera.dart';
 import '../../widgets/camera_preview_with_ocr_overlay.dart';
 
 class OcrTestScreen extends StatefulWidget {
-  const OcrTestScreen({Key? key}) : super(key: key);
+  const OcrTestScreen({super.key});
 
   @override
   State<OcrTestScreen> createState() => _OcrTestScreenState();

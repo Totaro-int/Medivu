@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/enhanced_auth_provider.dart';
-import '../../widgets/primary_button.dart';
 import '../../widgets/actfinder_logo.dart';
 import 'enhanced_register_screen.dart';
 
@@ -18,7 +17,6 @@ class _EnhancedLoginScreenState extends State<EnhancedLoginScreen> {
   final _passwordController = TextEditingController();
   
   bool _obscurePassword = true;
-  bool _rememberMe = true;
 
   @override
   void dispose() {
@@ -87,21 +85,6 @@ class _EnhancedLoginScreenState extends State<EnhancedLoginScreen> {
     );
   }
 
-  void _showForgotPasswordDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('비밀번호 찾기'),
-        content: const Text('현재 비밀번호 재설정 기능은 개발 중입니다.\n관리자에게 문의해 주세요.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('확인'),
-          ),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {

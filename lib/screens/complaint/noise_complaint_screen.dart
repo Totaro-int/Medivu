@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../models/recording_model.dart';
 import '../../models/report_model.dart';
-import '../../widgets/primary_button.dart' hide IconButton;
+import '../../widgets/primary_button.dart';
 import '../../services/enhanced_database_helper.dart';
 import '../../services/pdf_service.dart';
 import '../../providers/auth_provider.dart';
@@ -179,7 +179,7 @@ class _NoiseComplaintScreenState extends State<NoiseComplaintScreen> {
           avgDecibel: selectedData.noiseData.avgDecibel,
           startTime: selectedData.startTime,
           endTime: selectedData.endTime,
-          measurementCount: selectedData.noiseData.measurementCount ?? 0,
+          measurementCount: selectedData.noiseData.measurementCount,
           licensePlateNumber: null, // 실제 OCR 데이터로 교체
           licensePlateConfidence: null,
           licensePlateRawText: null,
@@ -191,7 +191,7 @@ class _NoiseComplaintScreenState extends State<NoiseComplaintScreen> {
           avgDecibel: selectedData.recording.noiseData.avgDecibel,
           startTime: selectedData.recording.startTime,
           endTime: selectedData.recording.endTime,
-          measurementCount: selectedData.recording.noiseData.measurementCount ?? 0,
+          measurementCount: selectedData.recording.noiseData.measurementCount,
         );
       }
 

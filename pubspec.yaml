@@ -89,10 +89,6 @@ dependencies:
   google_mlkit_text_recognition: ^0.14.0
   flutter_tesseract_ocr: ^0.4.25
   
-  # 🤖 TensorFlow Lite (온디바이스 ML) - 호환성 이슈로 주석처리
-  # tflite_flutter: ^0.9.0  # namespace 이슈
-  # tflite: ^1.1.2  # gradle 호환성 이슈
-  # 현재는 더미 구현으로 파이프라인 테스트
 
 dev_dependencies:
   flutter_test:
@@ -109,7 +105,6 @@ flutter:
 
   assets:
     - assets/logo.png
-    - assets/models/
     - assets/tessdata/
 
   # 📝 한국어 폰트 추가 (번호판 인식 개선용)
