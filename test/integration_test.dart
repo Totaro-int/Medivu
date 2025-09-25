@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:medivu_app/providers/recording_provider.dart';
-import 'package:medivu_app/providers/noise_provider.dart';
-import 'package:medivu_app/providers/auth_provider.dart';
-import 'package:medivu_app/services/local_database_service.dart';
-import 'package:medivu_app/models/noise_data_model.dart';
+import 'package:actfinder/providers/recording_provider.dart';
+import 'package:actfinder/providers/noise_provider.dart';
+import 'package:actfinder/providers/auth_provider.dart';
+import 'package:actfinder/services/local_database_service.dart';
+import 'package:actfinder/models/noise_data_model.dart';
 
 void main() {
   group('Integration Tests', () {

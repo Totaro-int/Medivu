@@ -14,6 +14,7 @@ import 'screens/report/report_screen.dart'; // 리포트 화면 import
 import 'screens/report/report_list_screen.dart'; // 리포트 목록 화면 import
 import 'screens/complaint/noise_complaint_screen.dart'; // 소음 신고 화면 import
 import 'screens/ocr/ocr_test_screen.dart'; // OCR 테스트 화면 import
+import 'screens/test/korean_ocr_test_screen.dart'; // 한글 OCR 테스트 화면 import
 // 데이터베이스 관련
 import 'services/enhanced_database_helper.dart';
 import 'utils/database_debug.dart';
@@ -63,6 +64,7 @@ class MyApp extends StatelessWidget {
         '/reportList': (context) => const ReportListScreen(), // ✅ 리포트 목록 화면
         '/complaint': (context) => const NoiseComplaintScreen(), // ✅ 소음 신고 화면
         '/ocr-test': (context) => const OcrTestScreen(), // ✅ OCR 테스트 화면
+        '/korean-ocr-test': (context) => const KoreanOCRTestScreen(), // ✅ 한글 OCR 테스트 화면
       },
 
       //동적 라우트 (예: 상세 페이지 등)

@@ -4,6 +4,7 @@ import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart
 import 'package:flutter_tesseract_ocr/flutter_tesseract_ocr.dart';
 import 'package:image/image.dart' as img;
 import '../models/license_plate_model.dart';
+import '../utils/ocr_performance_analyzer.dart';
 
 /// 번호판 후보 영역 정보
 class PlateRegion {
@@ -56,22 +57,52 @@ class LicensePlateOCRService {
   
   late final TextRecognizer _textRecognizer;
   bool _tesseractInitialized = false;
+
+  // 성능 분석 및 최적 전략
+  OCRStrategy? _currentStrategy;
+  final List<Map<String, dynamic>> _performanceHistory = [];
   
   /// OCR 서비스 초기화 (다중 엔진)
   Future<void> initialize() async {
     try {
-      // 1. Google ML Kit 초기화 (기본 텍스트 인식기 사용)
-      _textRecognizer = TextRecognizer();
+      // 1. Google ML Kit 초기화 (한국어 스크립트 인식 활성화)
+      _textRecognizer = TextRecognizer(script: TextRecognitionScript.korean);
       print('✅ Google ML Kit (범용) 초기화 완료');
-      
+
       // 2. Tesseract OCR 초기화 (백그라운드)
       _initializeTesseract();
-      
+
+      // 3. 최적 OCR 전략 초기화
+      _initializeOptimalStrategy();
+
     } catch (e) {
       print('❌ ML Kit 초기화 실패: $e');
-      // 초기화 실패 시 기본 TextRecognizer 사용
-      _textRecognizer = TextRecognizer();
-      print('🔄 기본 텍스트 인식기로 폴백');
+      // 초기화 실패 시 한국어 TextRecognizer로 폴백
+      _textRecognizer = TextRecognizer(script: TextRecognitionScript.korean);
+      print('🔄 한국어 텍스트 인식기로 폴백');
+    }
+  }
+
+  /// 최적 OCR 전략 초기화
+  void _initializeOptimalStrategy() {
+    try {
+      // 기본 조건으로 최적 전략 결정
+      _currentStrategy = OCRPerformanceAnalyzer.determineOptimalStrategy(
+        imageCondition: 'clean', // 기본적으로 깔끔한 조건으로 시작
+        targetProcessingTime: 1000, // 1초 목표
+        accuracyThreshold: 0.8, // 80% 정확도 목표
+        batteryOptimized: true, // 배터리 최적화 우선
+      );
+
+      print('🎯 최적 OCR 전략 설정 완료:');
+      print('  - 주 엔진: ${_currentStrategy!.primaryEngine}');
+      print('  - 대체 엔진: ${_currentStrategy!.fallbackEngine}');
+      print('  - 신뢰도: ${(_currentStrategy!.confidence * 100).toStringAsFixed(1)}%');
+      print('  - 이유: ${_currentStrategy!.reasoning}');
+    } catch (e) {
+      print('⚠️ 최적 전략 초기화 실패: $e');
+      // 기본 전략 사용
+      _currentStrategy = null;
     }
   }
 
@@ -89,111 +120,40 @@ class LicensePlateOCRService {
     }
   }
   
-  /// 이미지에서 번호판 텍스트 인식 (다중 엔진 앙상블 + 컨텍스트 인식)
+  /// 이미지에서 번호판 텍스트 인식 (지능형 엔진 선택 + 성능 최적화)
   Future<LicensePlateModel?> recognizeLicensePlate(String imagePath) async {
+    final startTime = DateTime.now();
     try {
-      print('🔍 컨텍스트 인식 번호판 검출 시작: $imagePath');
-      
+      print('🎯 지능형 한글 OCR 인식 시작: $imagePath');
+
+      // 이미지 조건 분석
+      final imageCondition = await _analyzeImageCondition(imagePath);
+      print('📷 이미지 조건 분석: $imageCondition');
+
+      // 동적 전략 최적화
+      if (_shouldUpdateStrategy(imageCondition)) {
+        _updateStrategy(imageCondition);
+      }
+
       // 이미지 파일 유효성 검사
       final file = File(imagePath);
       if (!await file.exists()) {
         print('❌ 이미지 파일이 존재하지 않음: $imagePath');
         return null;
       }
-      
+
       final fileSize = await file.length();
       print('📷 이미지 파일 크기: ${(fileSize / 1024).toStringAsFixed(1)}KB');
-      
-      final results = <LicensePlateModel>[];
-      
-      // 1단계: 번호판 후보 영역 검출
-      final plateRegions = await _detectPlateRegions(imagePath);
-      print('📍 검출된 번호판 후보 영역: ${plateRegions.length}개');
-      
-      // 2단계: 각 영역에 대해 다중 엔진 OCR 수행
-      if (plateRegions.isNotEmpty) {
-        for (int i = 0; i < plateRegions.length; i++) {
-          final region = plateRegions[i];
-          print('🎯 영역 $i 분석 중 (신뢰도: ${region.confidence.toStringAsFixed(3)})...');
-          
-          // 영역 기반 OCR 수행
-          final regionResults = await _performRegionBasedOCR(imagePath, region, i);
-          results.addAll(regionResults);
-        }
-      }
-      
-      // 3단계: 전체 이미지 OCR (후보 영역이 없거나 결과가 부족한 경우)
-      if (results.isEmpty || results.every((r) => (r.confidence ?? 0) < 0.7)) {
-        print('🔄 전체 이미지 OCR 수행...');
-        
-        // 전략 1: Google ML Kit (원본)
-        var mlkitResult = await _recognizeWithMLKit(imagePath, '전체원본');
-        if (mlkitResult != null) {
-          results.add(mlkitResult);
-          print('✅ ML Kit 전체 결과: ${mlkitResult.plateNumber} (${mlkitResult.confidence?.toStringAsFixed(3)})');
-        }
-        
-        // 전략 2: Tesseract OCR (가능한 경우)
-        if (_tesseractInitialized) {
-          var tesseractResult = await _recognizeWithTesseract(imagePath, '전체원본');
-          if (tesseractResult != null) {
-            results.add(tesseractResult);
-            print('✅ Tesseract 전체 결과: ${tesseractResult.plateNumber} (${tesseractResult.confidence?.toStringAsFixed(3)})');
-          }
-        }
-      }
-      
-      // 4단계: 결과가 없으면 다단계 전처리 후 재시도
-      if (results.isEmpty) {
-        print('🔄 원본 인식 실패, 다단계 전처리 후 재시도...');
-        
-        // 4-1: 기본 전처리 (밝기/대비 조정)
-        final basicEnhancedPath = await _preprocessImageBasic(imagePath);
-        if (basicEnhancedPath != imagePath) {
-          var mlkitResult = await _recognizeWithMLKit(basicEnhancedPath, '기본전처리');
-          if (mlkitResult != null) results.add(mlkitResult);
-          
-          if (_tesseractInitialized) {
-            var tesseractResult = await _recognizeWithTesseract(basicEnhancedPath, '기본전처리');
-            if (tesseractResult != null) results.add(tesseractResult);
-          }
-          
-          // 임시 파일 삭제
-          _cleanupTempFile(basicEnhancedPath);
-        }
-        
-        // 4-2: 고급 전처리 (전체 파이프라인)
-        if (results.isEmpty) {
-          final enhancedPath = await _preprocessImage(imagePath);
-          if (enhancedPath != imagePath) {
-            var mlkitResult = await _recognizeWithMLKit(enhancedPath, '고급전처리');
-            if (mlkitResult != null) results.add(mlkitResult);
-            
-            if (_tesseractInitialized) {
-              var tesseractResult = await _recognizeWithTesseract(enhancedPath, '고급전처리');
-              if (tesseractResult != null) results.add(tesseractResult);
-            }
-            
-            // 임시 파일 삭제
-            _cleanupTempFile(enhancedPath);
-          }
-        }
-        
-        // 4-3: 최후 수단 - 크기 조정 및 샤프닝
-        if (results.isEmpty) {
-          final scaledPath = await _preprocessImageScaled(imagePath);
-          if (scaledPath != imagePath) {
-            var mlkitResult = await _recognizeWithMLKit(scaledPath, '크기조정');
-            if (mlkitResult != null) results.add(mlkitResult);
-            
-            // 임시 파일 삭제
-            _cleanupTempFile(scaledPath);
-          }
-        }
-      }
-      
-      // 5단계: 컨텍스트 인식 앙상블 결과 선택
-      return _selectContextAwareBestResult(results);
+
+      // 지능형 OCR 실행
+      final result = await _executeIntelligentOCR(imagePath, imageCondition);
+
+      // 성능 기록
+      final endTime = DateTime.now();
+      final processingTime = endTime.difference(startTime).inMilliseconds;
+      _recordPerformance(result, processingTime, imageCondition);
+
+      return result;
       
     } catch (e) {
       print('❌ 번호판 인식 전체 실패: $e');
@@ -258,12 +218,12 @@ class LicensePlateOCRService {
       
       final extractedText = await FlutterTesseractOcr.extractText(
         imagePath,
-        language: 'eng', // 한국어 언어팩이 없을 수 있으므로 영어만 사용
+        language: 'kor+eng', // 한국어 + 영어 조합으로 번호판 인식 (한글 + 숫자)
         args: {
           "preserve_interword_spaces": "1",
           "psm": "8", // 단일 단어 인식
           "oem": "3", // 최신 LSTM 엔진
-          "-c": "tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", // 기본 문자만
+          "-c": "tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz가나다라마바사아자차카타파하거너더러머버서어저처커터퍼허고노도로모보소오조초코토포호구누두루무부수우주추쿠투푸후", // 한글 + 영어 + 숫자
         }
       ).timeout(const Duration(seconds: 15)); // 타임아웃 연장
       
@@ -1144,12 +1104,12 @@ class LicensePlateOCRService {
       
       if (originalImage == null) return imagePath;
       
-      // 1. 대비 및 밝기 향상만 적용
+      // 1. 한글 인식에 최적화된 대비 및 밝기 향상
       var processedImage = img.adjustColor(
         originalImage,
-        contrast: 1.5,
-        brightness: 1.2,
-        gamma: 1.0,
+        contrast: 1.8,  // 한글 획 강조를 위해 대비 증가
+        brightness: 1.1, // 밝기 약간만 증가
+        gamma: 0.9,      // 감마 보정으로 선명도 향상
       );
       
       // 전처리된 이미지 저장
@@ -1455,10 +1415,227 @@ class LicensePlateOCRService {
     return results;
   }
   
+  /// 이미지 조건 분석
+  Future<String> _analyzeImageCondition(String imagePath) async {
+    try {
+      final imageFile = File(imagePath);
+      final imageBytes = await imageFile.readAsBytes();
+      final image = img.decodeImage(imageBytes);
+
+      if (image == null) return 'unknown';
+
+      // 간단한 이미지 품질 분석
+      final avgBrightness = _calculateAverageBrightness(image);
+      final edgeCount = _calculateEdgeCount(image);
+
+      if (avgBrightness < 100 || edgeCount < 1000) {
+        return 'poor_lighting';
+      } else if (edgeCount > 10000) {
+        return 'complex';
+      } else if (image.width * image.height < 300000) { // 300K pixels
+        return 'small_text';
+      } else {
+        return 'clean';
+      }
+    } catch (e) {
+      print('⚠️ 이미지 조건 분석 실패: $e');
+      return 'unknown';
+    }
+  }
+
+  /// 평균 밝기 계산
+  double _calculateAverageBrightness(img.Image image) {
+    int totalBrightness = 0;
+    int pixelCount = 0;
+
+    for (int y = 0; y < image.height; y += 10) { // 샘플링으로 성능 최적화
+      for (int x = 0; x < image.width; x += 10) {
+        final pixel = image.getPixel(x, y);
+        totalBrightness += img.getLuminance(pixel).toInt();
+        pixelCount++;
+      }
+    }
+
+    return pixelCount > 0 ? totalBrightness / pixelCount : 128.0;
+  }
+
+  /// 엣지 개수 계산 (복잡도 측정)
+  int _calculateEdgeCount(img.Image image) {
+    int edgeCount = 0;
+
+    for (int y = 1; y < image.height - 1; y += 5) { // 샘플링으로 성능 최적화
+      for (int x = 1; x < image.width - 1; x += 5) {
+        final current = img.getLuminance(image.getPixel(x, y));
+        final right = img.getLuminance(image.getPixel(x + 1, y));
+        final bottom = img.getLuminance(image.getPixel(x, y + 1));
+
+        if ((current - right).abs() > 30 || (current - bottom).abs() > 30) {
+          edgeCount++;
+        }
+      }
+    }
+
+    return edgeCount;
+  }
+
+  /// 전략 업데이트 필요성 판단
+  bool _shouldUpdateStrategy(String imageCondition) {
+    if (_currentStrategy == null) return true;
+
+    // 성능 기록이 충분한 경우 (최근 10회)
+    if (_performanceHistory.length >= 10) {
+      final recentHistory = _performanceHistory.length > 10
+          ? _performanceHistory.sublist(_performanceHistory.length - 10)
+          : _performanceHistory;
+      final avgSuccessRate = recentHistory
+          .map((r) => r['success'] == true ? 1.0 : 0.0)
+          .reduce((a, b) => a + b) / recentHistory.length;
+
+      // 성공률이 70% 미만이면 전략 업데이트
+      return avgSuccessRate < 0.7;
+    }
+
+    return false; // 기록이 부족하면 현재 전략 유지
+  }
+
+  /// 전략 업데이트
+  void _updateStrategy(String imageCondition) {
+    try {
+      _currentStrategy = OCRPerformanceAnalyzer.determineOptimalStrategy(
+        imageCondition: imageCondition,
+        targetProcessingTime: 1500, // 더 여유있는 처리시간
+        accuracyThreshold: 0.85, // 더 높은 정확도 요구
+        batteryOptimized: false, // 정확도 우선
+      );
+
+      print('🔄 OCR 전략 업데이트:');
+      print('  - 주 엔진: ${_currentStrategy!.primaryEngine}');
+      print('  - 대체 엔진: ${_currentStrategy!.fallbackEngine}');
+      print('  - 이유: ${_currentStrategy!.reasoning}');
+    } catch (e) {
+      print('⚠️ 전략 업데이트 실패: $e');
+    }
+  }
+
+  /// 지능형 OCR 실행
+  Future<LicensePlateModel?> _executeIntelligentOCR(String imagePath, String imageCondition) async {
+    if (_currentStrategy == null) {
+      // 전략이 없으면 기본 ML Kit 사용
+      return await _recognizeWithMLKit(imagePath, 'fallback');
+    }
+
+    final primaryEngine = _currentStrategy!.primaryEngine;
+    final fallbackEngine = _currentStrategy!.fallbackEngine;
+
+    print('🎯 주 엔진 실행: $primaryEngine');
+
+    // 주 엔진 실행
+    LicensePlateModel? result;
+    if (primaryEngine == 'google_mlkit') {
+      result = await _recognizeWithMLKit(imagePath, 'primary_mlkit');
+    } else if (primaryEngine == 'tesseract' && _tesseractInitialized) {
+      result = await _recognizeWithTesseract(imagePath, 'primary_tesseract');
+    }
+
+    // 주 엔진 결과 검증
+    if (result != null && (result.confidence ?? 0) >= 0.7) {
+      print('✅ 주 엔진 성공: ${result.plateNumber} (${result.confidence?.toStringAsFixed(3)})');
+      return result;
+    }
+
+    // 대체 엔진 실행
+    print('🔄 대체 엔진 실행: $fallbackEngine');
+    LicensePlateModel? fallbackResult;
+    if (fallbackEngine == 'google_mlkit') {
+      fallbackResult = await _recognizeWithMLKit(imagePath, 'fallback_mlkit');
+    } else if (fallbackEngine == 'tesseract' && _tesseractInitialized) {
+      fallbackResult = await _recognizeWithTesseract(imagePath, 'fallback_tesseract');
+    }
+
+    if (fallbackResult != null && (fallbackResult.confidence ?? 0) >= 0.5) {
+      print('✅ 대체 엔진 성공: ${fallbackResult.plateNumber} (${fallbackResult.confidence?.toStringAsFixed(3)})');
+      return fallbackResult;
+    }
+
+    // 모든 엔진 실패 시 전처리 후 재시도
+    print('🔄 전처리 후 재시도...');
+    return await _preprocessAndRetry(imagePath);
+  }
+
+  /// 전처리 후 재시도
+  Future<LicensePlateModel?> _preprocessAndRetry(String imagePath) async {
+    try {
+      // 기본 전처리
+      final enhancedPath = await _preprocessImageBasic(imagePath);
+      if (enhancedPath != imagePath) {
+        final mlkitResult = await _recognizeWithMLKit(enhancedPath, 'enhanced');
+        _cleanupTempFile(enhancedPath);
+
+        if (mlkitResult != null && (mlkitResult.confidence ?? 0) >= 0.5) {
+          return mlkitResult;
+        }
+      }
+
+      // 고급 전처리
+      final advancedPath = await _preprocessImage(imagePath);
+      if (advancedPath != imagePath) {
+        final mlkitResult = await _recognizeWithMLKit(advancedPath, 'advanced');
+        _cleanupTempFile(advancedPath);
+
+        if (mlkitResult != null) {
+          return mlkitResult;
+        }
+      }
+
+      return null;
+    } catch (e) {
+      print('❌ 전처리 재시도 실패: $e');
+      return null;
+    }
+  }
+
+  /// 성능 기록
+  void _recordPerformance(LicensePlateModel? result, int processingTime, String imageCondition) {
+    final performance = {
+      'timestamp': DateTime.now().toIso8601String(),
+      'success': result != null,
+      'processing_time': processingTime,
+      'confidence': result?.confidence ?? 0.0,
+      'ocr_provider': result?.ocrProvider ?? 'unknown',
+      'image_condition': imageCondition,
+      'plate_number': result?.plateNumber,
+    };
+
+    _performanceHistory.add(performance);
+
+    // 최근 100개 기록만 유지 (메모리 관리)
+    if (_performanceHistory.length > 100) {
+      _performanceHistory.removeAt(0);
+    }
+
+    print('📊 성능 기록: ${result != null ? "성공" : "실패"} (${processingTime}ms, ${result?.ocrProvider ?? "N/A"})');
+  }
+
+  /// 성능 리포트 생성
+  OCRPerformanceReport generatePerformanceReport() {
+    if (_performanceHistory.isEmpty) {
+      return OCRPerformanceReport.empty();
+    }
+
+    return OCRPerformanceAnalyzer.analyzeRuntimePerformance(_performanceHistory);
+  }
+
+  /// 성능 기록 초기화
+  void clearPerformanceHistory() {
+    _performanceHistory.clear();
+    print('🗑️ 성능 기록 초기화 완료');
+  }
+
   /// OCR 서비스 정리
   Future<void> dispose() async {
     try {
       await _textRecognizer.close();
+      clearPerformanceHistory();
       print('✅ 번호판 OCR 서비스 정리 완료');
     } catch (e) {
       print('❌ 번호판 OCR 서비스 정리 실패: $e');

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:medivu_app/screens/auth/email_input_screen.dart';
+import 'package:actfinder/screens/auth/email_input_screen.dart';
 
 class AgreementScreen extends StatefulWidget {
   const AgreementScreen({super.key});

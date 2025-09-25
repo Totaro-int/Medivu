@@ -1,5 +1,5 @@
-name: medivu_app
-description: "ActFinder - 소음 측정 및 번호판 인식 증거 수집 앱"
+name: actfinder
+description: "ActFinder - 소음 측정 및 번호판 인식으로 생활 소음 신고를 쉽게"
 
 publish_to: 'none'
 
@@ -25,7 +25,7 @@ dependencies:
   flutter_webrtc: any
 
   # 🔊 소음 측정
-  noise_meter: ^5.0.2
+  noise_meter: ^5.1.0
 
   # 📍 위치 서비스
   geolocator: ^14.0.2
@@ -110,16 +110,17 @@ flutter:
   assets:
     - assets/logo.png
     - assets/models/
+    - assets/tessdata/
 
   # 📝 한국어 폰트 추가 (번호판 인식 개선용)
-  # fonts:
-  #   - family: NotoSansKR
-  #     fonts:
-  #       - asset: assets/fonts/NotoSansKR-Regular.ttf
-  #       - asset: assets/fonts/NotoSansKR-Bold.ttf
-  #         weight: 700
-  #   - family: RobotoMono
-  #     fonts:
-  #       - asset: assets/fonts/RobotoMono-Regular.ttf
-  #       - asset: assets/fonts/RobotoMono-Bold.ttf
-  #         weight: 700
+  fonts:
+    - family: NotoSansKR
+      fonts:
+        - asset: assets/fonts/NotoSansKR-Regular.ttf
+        - asset: assets/fonts/NotoSansKR-Bold.ttf
+          weight: 700
+    - family: RobotoMono
+      fonts:
+        - asset: assets/fonts/RobotoMono-Regular.ttf
+        - asset: assets/fonts/RobotoMono-Bold.ttf
+          weight: 700

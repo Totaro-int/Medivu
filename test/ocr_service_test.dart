@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:medivu_app/services/license_plate_ocr_service.dart';
+import 'package:actfinder/services/license_plate_ocr_service.dart';
 
 void main() {
   group('LicensePlateOCRService Tests', () {

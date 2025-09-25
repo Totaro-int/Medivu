@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
-import 'package:medivu_app/services/database_helper.dart';
+import 'package:actfinder/services/database_helper.dart';
 
 void main() {
   group('Database Location Tests', () {
