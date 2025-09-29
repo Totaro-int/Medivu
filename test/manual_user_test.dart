@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:actfinder/services/local_database_service.dart';
-import 'package:actfinder/providers/auth_provider.dart';
+import 'package:noise0/services/local_database_service.dart';
+import 'package:noise0/providers/auth_provider.dart';
 
 void main() {
   group('Manual User Test', () {

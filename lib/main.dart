@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => EnhancedAuthProvider.instance),
       ],
       child: MaterialApp(
-        title: 'ActFinder',
+        title: 'noise0',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
@@ -214,7 +214,7 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
               const CircularProgressIndicator(),
               const SizedBox(height: 16),
               Text(
-                'ActFinder 초기화 중...',
+                'noise0 초기화 중...',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),

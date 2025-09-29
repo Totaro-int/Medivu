@@ -1,5 +1,5 @@
-name: actfinder
-description: "ActFinder - 소음 측정 및 번호판 인식으로 생활 소음 신고를 쉽게"
+name: noise0
+description: "noise0 - 소음 측정 및 번호판 인식으로 생활 소음 신고를 쉽게"
 
 publish_to: 'none'
 
@@ -112,8 +112,6 @@ flutter:
     - family: NotoSansKR
       fonts:
         - asset: assets/fonts/NotoSansKR-Regular.ttf
-        - asset: assets/fonts/NotoSansKR-Bold.ttf
-          weight: 700
     - family: RobotoMono
       fonts:
         - asset: assets/fonts/RobotoMono-Regular.ttf

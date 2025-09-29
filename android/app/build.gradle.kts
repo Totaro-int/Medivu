@@ -25,6 +25,15 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
+    tasks.withType<JavaCompile> {
+        options.compilerArgs.addAll(listOf(
+            "-Xlint:-options",
+            "-Xlint:-deprecation",
+            "-Xlint:-unchecked"
+        ))
+        options.isWarnings = false
+    }
+
     kotlinOptions {
         jvmTarget = "11"
     }
@@ -49,8 +58,8 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = false
-            isShrinkResources = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }

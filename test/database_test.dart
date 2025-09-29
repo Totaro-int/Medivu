@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:actfinder/services/database_helper.dart';
-import 'package:actfinder/services/local_database_service.dart';
-import 'package:actfinder/models/recording_model.dart';
-import 'package:actfinder/models/noise_data_model.dart';
+import 'package:noise0/services/database_helper.dart';
+import 'package:noise0/services/local_database_service.dart';
+import 'package:noise0/models/recording_model.dart';
+import 'package:noise0/models/noise_data_model.dart';
 
 void main() {
   group('Database Tests', () {

@@ -27,7 +27,7 @@ class EnhancedAuthApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => EnhancedAuthProvider.instance),
       ],
       child: MaterialApp(
-        title: 'ActFinder Enhanced Auth',
+        title: 'noise0 Enhanced Auth',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
@@ -132,7 +132,7 @@ class _EnhancedAuthWrapperState extends State<EnhancedAuthWrapper>
               const CircularProgressIndicator(),
               const SizedBox(height: 16),
               Text(
-                'Enhanced ActFinder 초기화 중...',
+                'Enhanced noise0 초기화 중...',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
