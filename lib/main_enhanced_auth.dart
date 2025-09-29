@@ -5,18 +5,11 @@ import 'providers/enhanced_auth_provider.dart';
 import 'screens/auth/enhanced_login_screen.dart';
 import 'screens/home/main_home_screen.dart';
 import 'services/enhanced_database_helper.dart';
-import 'services/database_migration_manager.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // 데이터베이스 마이그레이션 체크
-  final migrationManager = DatabaseMigrationManager.instance;
-  final migrationSuccess = await migrationManager.checkAndMigrate();
-  
-  if (!migrationSuccess) {
-    print('❌ 데이터베이스 마이그레이션 실패');
-  }
+
+  // 데이터베이스 초기화
+  await EnhancedDatabaseHelper.instance.database;
   
   // Enhanced 데이터베이스 초기화
   await EnhancedDatabaseHelper.instance.database;
@@ -196,9 +189,8 @@ class _EnhancedAuthWrapperState extends State<EnhancedAuthWrapper>
                   const SizedBox(width: 16),
                   OutlinedButton(
                     onPressed: () async {
-                      // 강제 마이그레이션 재실행
-                      final migrationManager = DatabaseMigrationManager.instance;
-                      await migrationManager.forceMigration();
+                      // 데이터베이스 재초기화
+                      await EnhancedDatabaseHelper.instance.database;
                       setState(() {
                         _isInitialized = false;
                         _hasError = false;
