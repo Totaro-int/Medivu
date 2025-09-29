@@ -1,5 +1,5 @@
 name: noise0
-description: "noise0 - 소음 측정 및 번호판 인식으로 생활 소음 신고를 쉽게"
+description: "소음0 - 소음 측정 및 번호판 인식으로 생활 소음 신고를 쉽게"
 
 publish_to: 'none'
 
@@ -104,7 +104,7 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/logo.png
+    - assets/소음0.png
     - assets/tessdata/
 
   # 📝 한국어 폰트 추가 (번호판 인식 개선용)

@@ -27,7 +27,7 @@ class EnhancedAuthApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => EnhancedAuthProvider.instance),
       ],
       child: MaterialApp(
-        title: 'noise0 Enhanced Auth',
+        title: '소음0 Enhanced Auth',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),

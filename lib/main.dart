@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => EnhancedAuthProvider.instance),
       ],
       child: MaterialApp(
-        title: 'noise0',
+        title: '소음0',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
