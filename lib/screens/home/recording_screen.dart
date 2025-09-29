@@ -641,7 +641,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
               action: SnackBarAction(
                 label: '리포트 보기',
                 textColor: Colors.white,
-                onPressed: () => _showReport(), // 강제로 리포트 표시
+                onPressed: () => _showReport(), // 리포트 표시
               ),
             ),
           );
@@ -1822,7 +1822,7 @@ ${recording.licensePlate?.plateNumber ?? '번호판 인식되지 않음'}
                             }
                           },
                           icon: const Icon(Icons.assessment_outlined),
-                          label: const Text('📊 리포트 보기 (강제)', style: TextStyle(fontWeight: FontWeight.bold)),
+                          label: const Text('📊 리포트 보기', style: TextStyle(fontWeight: FontWeight.bold)),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.orange, // 더 눈에 잘 띄는 색상
                             foregroundColor: Colors.white,

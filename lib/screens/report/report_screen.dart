@@ -421,6 +421,35 @@ class _ReportScreenState extends State<ReportScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 16),
+
+            // PDF 직접 수정 버튼
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  // 리포트를 편집 모드로 다시 로드
+                  if (_report != null) {
+                    Navigator.pushReplacementNamed(
+                      context,
+                      '/report',
+                      arguments: {
+                        'reportId': _report!.id,
+                        'editMode': true,
+                      },
+                    );
+                  }
+                },
+                icon: const Icon(Icons.edit_document),
+                label: const Text('PDF 내용 직접 수정'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4299E1),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
           ],
         ),
       ),

@@ -3,6 +3,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
 import '../models/location_model.dart';
 import 'location_service.dart';
 
@@ -14,17 +15,28 @@ class PdfService {
   // 한글 폰트 캐시
   pw.Font? _koreanFont;
 
-  /// PDF용 안전한 폰트 로드 (영어 텍스트 사용)
+  /// PDF용 한글 폰트 로드
   Future<pw.Font> _getKoreanFont() async {
     if (_koreanFont != null) return _koreanFont!;
-    
+
     try {
-      // 안정적인 기본 폰트 사용
-      _koreanFont = pw.Font.helvetica();
+      // NotoSansKR 폰트 로드 시도
+      print('한글 폰트 로딩 중...');
+      final fontData = await rootBundle.load('assets/fonts/NotoSansKR-Regular.ttf');
+      _koreanFont = pw.Font.ttf(fontData);
+      print('✅ 한글 폰트 로딩 성공');
       return _koreanFont!;
     } catch (e) {
-      print('폰트 로드 실패: $e');
-      return pw.Font.courier();
+      print('❌ 한글 폰트 로드 실패: $e');
+      // 영어 폰트 폴백
+      try {
+        print('영어 폰트로 폴백...');
+        _koreanFont = pw.Font.helvetica();
+        return _koreanFont!;
+      } catch (e2) {
+        print('❌ 영어 폰트도 실패: $e2');
+        return pw.Font.courier();
+      }
     }
   }
 
@@ -49,7 +61,7 @@ class PdfService {
     double? sleepQuality,
   }) async {
     try {
-      print('PDF 생성 시작...');
+      print('📄 PDF 생성 시작...');
       
       // 입력 데이터 검증
       if (maxDecibel == null && minDecibel == null && avgDecibel == null) {
@@ -989,6 +1001,3 @@ class PdfService {
   }
 }
 
-extension on PdfColor {
-  void withOpacity(double d) {}
-}
