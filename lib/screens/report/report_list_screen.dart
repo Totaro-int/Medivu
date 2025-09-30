@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../models/report_model.dart';
+import '../../models/recording_model.dart';
 import '../../widgets/primary_button.dart';
+import '../../widgets/share_dialog.dart';
 import '../../utils/constants.dart';
 import '../../services/enhanced_database_helper.dart';
+import '../../services/pdf_service.dart';
 import '../../providers/enhanced_auth_provider.dart';
 
 class ReportListScreen extends StatefulWidget {
@@ -35,38 +38,43 @@ class _ReportListScreenState extends State<ReportListScreen> {
       final authProvider = Provider.of<EnhancedAuthProvider>(context, listen: false);
       final userId = authProvider.userId;
       
-      print('🔍 리포트 목록 로드 시작');
-      print('  - 로그인 상태: ${authProvider.isLoggedIn}');
-      print('  - 사용자 ID (userId): $userId');
-      print('  - 사용자 ID 타입: ${userId.runtimeType}');
-      print('  - currentUser?.id: ${authProvider.currentUser?.id}');
-      
+      debugPrint('🔍 리포트 목록 로드 시작');
+      debugPrint('  - 로그인 상태: ${authProvider.isLoggedIn}');
+      debugPrint('  - 사용자 ID (userId): $userId');
+      debugPrint('  - 사용자 ID 타입: ${userId.runtimeType}');
+      debugPrint('  - currentUser?.id: ${authProvider.currentUser?.id}');
+
       if (userId == null) {
         throw Exception('로그인된 사용자가 없습니다.');
       }
-      
+
       // 실제 DB에서 해당 사용자의 리포트 데이터 조회
-      print('  - DB에서 사용자 리포트 데이터 조회 시작...');
+      debugPrint('  - DB에서 사용자 리포트 데이터 조회 시작...');
       final numericUserId = int.tryParse(userId) ?? 1;
+      debugPrint('  - 변환된 숫자 userId: $numericUserId');
       final reports = await EnhancedDatabaseHelper.instance.getUserReports(numericUserId);
-      
-      print('  - 조회된 리포트 데이터 개수: ${reports.length}');
+
+      debugPrint('  - 조회된 리포트 데이터 개수: ${reports.length}');
+      if (reports.isEmpty) {
+        debugPrint('  ⚠️ 리포트 데이터가 없습니다. 녹화를 완료하고 리포트를 생성해주세요.');
+      }
       
       setState(() {
         _reports = reports;
         _isLoading = false;
       });
-    } catch (e) {
-      print('❌ 리포트 목록 로드 실패: $e');
+    } catch (e, stackTrace) {
+      debugPrint('❌ 리포트 목록 로드 실패: $e');
+      debugPrint('스택 트레이스:\n$stackTrace');
       setState(() {
         _isLoading = false;
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('리포트 로딩 실패: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
+            content: Text('리포트 데이터가 없습니다.\n녹화를 완료하고 리포트를 생성해주세요.'),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 4),
           ),
         );
       }
@@ -743,11 +751,39 @@ class _ReportListScreenState extends State<ReportListScreen> {
     _loadReports(); // 목록 새로고침
   }
 
-  void _shareReport(ReportModel report) {
-    // TODO: 리포트 공유 기능 구현
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('공유 기능이 준비 중입니다.')),
-    );
+  void _shareReport(ReportModel report) async {
+    try {
+      // 실제 리포트 데이터로 PDF 생성
+      final recording = report.recording;
+      final pdfPath = await PdfService().generateDecibelReport(
+        maxDecibel: recording.noiseData.maxDecibel ?? 50.0,
+        minDecibel: recording.noiseData.minDecibel ?? 30.0,
+        avgDecibel: recording.noiseData.avgDecibel ?? 40.0,
+        startTime: recording.startTime,
+        endTime: recording.endTime,
+        measurementCount: recording.noiseData.measurementCount ?? 15,
+        licensePlateNumber: recording.licensePlate?.plateNumber ?? '인식되지 않음',
+        licensePlateConfidence: recording.licensePlate?.confidence ?? 0.0,
+        licensePlateRawText: recording.licensePlate?.rawText ?? '인식되지 않음',
+      );
+      if (pdfPath != null) {
+        // PDF 공유 다이얼로그 표시
+        showDialog(
+          context: context,
+          builder: (context) => ShareDialog(
+            report: report,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('PDF 생성에 실패했습니다.')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('공유 중 오류가 발생했습니다: $e')),
+      );
+    }
   }
 
   void _deleteReport(ReportModel report) {

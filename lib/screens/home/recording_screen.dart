@@ -664,17 +664,8 @@ class _RecordingScreenState extends State<RecordingScreen> {
       debugPrint('  - 로그인 상태: ${authProvider.isLoggedIn}');
       debugPrint('  - 사용자 ID: ${authProvider.userId}');
       
-      // 먼저 recording을 데이터베이스에 저장
-      debugPrint('📀 Recording 데이터베이스 저장 시작...');
-      final savedSessionId = await EnhancedDatabaseHelper.instance.insertSession(recording);
-      debugPrint('💾 저장된 세션 ID: $savedSessionId');
-      
-      // 저장된 recording 검증 (실제 세션 ID로 조회)
-      final savedRecording = await EnhancedDatabaseHelper.instance.getSession(savedSessionId);
-      if (savedRecording == null) {
-        throw Exception('Recording 저장 실패: 저장된 데이터를 찾을 수 없습니다 (세션 ID: $savedSessionId)');
-      }
-      debugPrint('✅ Recording 저장 및 검증 완료: ${savedRecording.id}');
+      // Recording은 insertReport 메서드에서 자동으로 처리됨
+      debugPrint('📀 Recording은 리포트 생성 시 자동으로 저장됩니다...');
       
       if (!authProvider.isLoggedIn) {
         debugPrint('⚠️ 로그인이 되어있지 않습니다. 기본 사용자로 진행합니다.');
@@ -706,19 +697,19 @@ ${recording.licensePlate?.plateNumber ?? '번호판 인식되지 않음'}
       final userId = authProvider.userId ?? '1'; // 기본 사용자 ID
       debugPrint('  - userId: $userId');
       
-      // 저장된 recording 사용 (userId 일치시키기)
+      // 원본 recording 사용 (userId 일치시키기)
       final reportRecording = RecordingModel(
-        id: savedRecording.id, // 데이터베이스에 저장된 숫자 ID
-        videoPath: savedRecording.videoPath,
-        videoUrl: savedRecording.videoUrl,
-        startTime: savedRecording.startTime,
-        endTime: savedRecording.endTime,
-        noiseData: savedRecording.noiseData,
-        location: savedRecording.location,
-        licensePlate: savedRecording.licensePlate,
+        id: recording.id, // 원본 recording ID 사용
+        videoPath: recording.videoPath,
+        videoUrl: recording.videoUrl,
+        startTime: recording.startTime,
+        endTime: recording.endTime,
+        noiseData: recording.noiseData,
+        location: recording.location,
+        licensePlate: recording.licensePlate,
         userId: userId, // 사용자 ID 일치시키기
-        status: savedRecording.status,
-        metadata: savedRecording.metadata,
+        status: recording.status,
+        metadata: recording.metadata,
       );
       
       final report = ReportModel(

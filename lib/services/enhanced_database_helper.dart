@@ -14,8 +14,8 @@ class EnhancedDatabaseHelper {
   static EnhancedDatabaseHelper? _instance;
   static Database? _database;
 
-  static const int _currentVersion = 2;
-  static const String _dbName = 'medivu_app_enhanced.db';
+  static const int _currentVersion = 3;
+  static const String _dbName = 'medivu_app_enhanced_v3.db';
 
   static EnhancedDatabaseHelper get instance {
     _instance ??= EnhancedDatabaseHelper._internal();
@@ -69,9 +69,13 @@ class EnhancedDatabaseHelper {
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     print('🔄 데이터베이스 업그레이드: $oldVersion -> $newVersion');
-    
+
     if (oldVersion < 2) {
       await _migrateToV2(db);
+    }
+
+    if (oldVersion < 3) {
+      await _migrateToV3(db);
     }
   }
 
@@ -234,7 +238,7 @@ class EnhancedDatabaseHelper {
         description TEXT,
         generated_pdf_path TEXT,
         report_type TEXT DEFAULT 'noise_complaint' CHECK (report_type IN ('noise_complaint', 'traffic_violation', 'evidence_report')),
-        status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'generated', 'submitted', 'completed')),
+        status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'processing', 'ready', 'generated', 'submitted', 'completed', 'rejected', 'approved')),
         submission_reference TEXT,
         submitted_to TEXT,
         submitted_at INTEGER,
@@ -312,6 +316,53 @@ class EnhancedDatabaseHelper {
     await db.execute('DROP TABLE users_backup');
     
     print('✅ V2 마이그레이션 완료');
+  }
+
+  Future<void> _migrateToV3(Database db) async {
+    // V2에서 V3로 마이그레이션 로직
+    print('🔄 V3 마이그레이션 시작 - reports 테이블 status 제약조건 확장');
+
+    try {
+      // 새로운 reports 테이블 생성 (임시)
+      await db.execute('''
+        CREATE TABLE reports_new (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          session_id INTEGER NOT NULL,
+          title TEXT NOT NULL,
+          description TEXT,
+          generated_pdf_path TEXT,
+          report_type TEXT DEFAULT 'noise_complaint' CHECK (report_type IN ('noise_complaint', 'traffic_violation', 'evidence_report')),
+          status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'processing', 'ready', 'generated', 'submitted', 'completed', 'rejected', 'approved')),
+          submission_reference TEXT,
+          submitted_to TEXT,
+          submitted_at INTEGER,
+          created_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL,
+          FOREIGN KEY (session_id) REFERENCES recording_sessions (id) ON DELETE CASCADE
+        )
+      ''');
+
+      // 기존 데이터 복사
+      await db.execute('''
+        INSERT INTO reports_new (id, session_id, title, description, generated_pdf_path, report_type, status, submission_reference, submitted_to, submitted_at, created_at, updated_at)
+        SELECT id, session_id, title, description, generated_pdf_path, report_type, status, submission_reference, submitted_to, submitted_at, created_at, updated_at
+        FROM reports
+      ''');
+
+      // 기존 테이블 삭제
+      await db.execute('DROP TABLE reports');
+
+      // 새 테이블 이름 변경
+      await db.execute('ALTER TABLE reports_new RENAME TO reports');
+
+      // 인덱스 재생성
+      await db.execute('CREATE INDEX idx_reports_session_id ON reports (session_id)');
+
+      print('✅ V3 마이그레이션 완료 - reports 테이블 status 제약조건 확장');
+    } catch (e) {
+      print('❌ V3 마이그레이션 실패: $e');
+      rethrow;
+    }
   }
 
   // 보안 관련 유틸리티 메서드

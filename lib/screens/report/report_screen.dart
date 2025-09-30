@@ -45,7 +45,10 @@ class _ReportScreenState extends State<ReportScreen> {
   @override
   void initState() {
     super.initState();
-    _loadReportData();
+    // WidgetsBinding 후에 실행하여 context가 완전히 준비된 후 실행
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadReportData();
+    });
   }
 
   Future<void> _loadReportData() async {
@@ -54,7 +57,7 @@ class _ReportScreenState extends State<ReportScreen> {
     });
 
     try {
-      final Map<String, dynamic>? args = 
+      final Map<String, dynamic>? args =
           ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
       
       print('🔍 리포트 로드 시작');
@@ -88,14 +91,7 @@ class _ReportScreenState extends State<ReportScreen> {
       print('  - 최종 리포트 상태: ${_report != null ? '성공' : '실패'}');
     } catch (e) {
       print('❌ 리포트 데이터 로드 실패: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('리포트 로드 실패: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      // initState 중에는 ScaffoldMessenger 접근 불가하므로 단순히 로그만 출력
     } finally {
       setState(() {
         _isLoading = false;

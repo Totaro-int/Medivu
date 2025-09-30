@@ -126,16 +126,6 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
     );
   }
 
-  void _goToOcrTest() async {
-    // 카메라 권한 체크 후 OCR 테스트 화면으로 이동
-    final permissionResult = await _permissionService.checkAllPermissions();
-    
-    if (permissionResult.allGranted) {
-      Navigator.pushNamed(context, '/ocr-test');
-    } else {
-      await _showPermissionRequiredDialog(permissionResult);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -319,7 +309,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                                   // 고정 높이 사용으로 오버플로우 방지
                                   mainAxisExtent: screenWidth > 600 ? 200 : 180,
                                 ),
-                                itemCount: 5, // 아이템 개수
+                                itemCount: 4, // 아이템 개수
                                 itemBuilder: (context, index) {
                                   final items = [
                                     {
@@ -349,13 +339,6 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                                       'description': '권한 및 환경설정',
                                       'color': const Color(0xFF805AD5),
                                       'onTap': _goToSettings,
-                                    },
-                                    {
-                                      'icon': Icons.camera_alt_outlined,
-                                      'label': 'OCR 테스트',
-                                      'description': '번호판 인식 테스트',
-                                      'color': const Color(0xFF38B2AC),
-                                      'onTap': _goToOcrTest,
                                     },
                                   ];
                                   

@@ -42,7 +42,7 @@ class ActFinderLogo extends StatelessWidget {
         if (showText) ...[
           const SizedBox(width: AppConstants.paddingSmall),
           Text(
-            'ActFinder',
+            '소음제로',
             style: TextStyle(
               fontSize: textSize,
               fontWeight: fontWeight,
@@ -106,7 +106,7 @@ class ActFinderLogoVertical extends StatelessWidget {
         if (showText) ...[
           SizedBox(height: spacing),
           Text(
-            'ActFinder',
+            '소음제로',
             style: TextStyle(
               fontSize: textSize,
               fontWeight: fontWeight,
@@ -116,7 +116,7 @@ class ActFinderLogoVertical extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            '행동을 찾아내는 앱',
+            '소음 측정 및 신고 앱',
             style: TextStyle(
               fontSize: textSize * 0.4,
               fontWeight: FontWeight.normal,

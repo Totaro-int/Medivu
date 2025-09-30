@@ -146,7 +146,7 @@ class PdfService {
       child: pw.Column(
         children: [
           pw.Text(
-            'Decibel Measurement Report',
+            '소음 측정 리포트',
             style: pw.TextStyle(
               fontSize: 24,
               fontWeight: pw.FontWeight.bold,
@@ -184,7 +184,7 @@ class PdfService {
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Text(
-            'Measurement Information',
+            '측정 정보',
             style: pw.TextStyle(
               fontSize: 18,
               fontWeight: pw.FontWeight.bold,
@@ -192,16 +192,16 @@ class PdfService {
             ),
           ),
           pw.SizedBox(height: 10),
-          _buildInfoRow(font, 'Start Time', startTime != null
+          _buildInfoRow(font, '시작 시간', startTime != null
               ? DateFormat('HH:mm:ss').format(startTime)
               : 'N/A'),
-          _buildInfoRow(font, 'End Time', endTime != null
+          _buildInfoRow(font, '종료 시간', endTime != null
               ? DateFormat('HH:mm:ss').format(endTime)
               : 'N/A'),
-          _buildInfoRow(font, 'Duration', duration != null 
+          _buildInfoRow(font, '지속 시간', duration != null 
               ? '${duration.inMinutes}m ${duration.inSeconds % 60}s'
               : 'N/A'),
-          _buildInfoRow(font, 'Count', measurementCount != null 
+          _buildInfoRow(font, '측정 횟수', measurementCount != null 
               ? '$measurementCount times'
               : 'N/A'),
         ],
@@ -221,7 +221,7 @@ class PdfService {
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Text(
-            'Decibel Statistics',
+            '데시벨 통계',
             style: pw.TextStyle(
               fontSize: 18,
               fontWeight: pw.FontWeight.bold,
@@ -269,7 +269,7 @@ class PdfService {
               ),
               pw.SizedBox(width: 10),
               pw.Text(
-                'Measurement Location',
+                '측정 위치',
                 style: pw.TextStyle(
                   fontSize: 18,
                   fontWeight: pw.FontWeight.bold,
@@ -284,13 +284,13 @@ class PdfService {
           if (location != null) ...[
             // 실제 위치 데이터가 있는 경우
             if (location.address != null && location.address!.isNotEmpty)
-              _buildInfoRow(font, 'Address', location.address!),
+              _buildInfoRow(font, '주소', location.address!),
             if (location.city != null && location.city!.isNotEmpty)
-              _buildInfoRow(font, 'City', location.city!),
+              _buildInfoRow(font, '도시', location.city!),
             if (location.district != null && location.district!.isNotEmpty)
               _buildInfoRow(font, 'District', location.district!),
-            _buildInfoRow(font, 'Latitude', location.latitude.toStringAsFixed(6)),
-            _buildInfoRow(font, 'Longitude', location.longitude.toStringAsFixed(6)),
+            _buildInfoRow(font, '위도', location.latitude.toStringAsFixed(6)),
+            _buildInfoRow(font, '경도', location.longitude.toStringAsFixed(6)),
             if (location.accuracy != null)
               _buildInfoRow(font, 'Accuracy', '${location.accuracy!.toStringAsFixed(1)}m'),
             _buildInfoRow(font, 'Timestamp', DateFormat('yyyy-MM-dd HH:mm:ss').format(location.timestamp)),
@@ -400,7 +400,7 @@ class PdfService {
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Text(
-            'Video Information',
+            '비디오 정보',
             style: pw.TextStyle(
               fontSize: 18,
               fontWeight: pw.FontWeight.bold,
@@ -454,7 +454,7 @@ class PdfService {
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Text(
-            'Decibel Level Assessment',
+            '데시벨 수준 평가',
             style: pw.TextStyle(
               fontSize: 18,
               fontWeight: pw.FontWeight.bold,
@@ -515,7 +515,7 @@ class PdfService {
               ),
               pw.SizedBox(width: 10),
               pw.Text(
-                'License Plate Information',
+                '번호판 정보',
                 style: pw.TextStyle(
                   fontSize: 18,
                   fontWeight: pw.FontWeight.bold,
@@ -527,7 +527,7 @@ class PdfService {
           ),
           pw.SizedBox(height: 15),
           if (plateNumber != null && plateNumber.isNotEmpty) ...[
-            _buildInfoRow(font, 'License Plate', plateNumber),
+            _buildInfoRow(font, '번호판', plateNumber),
             if (confidence != null)
               _buildInfoRow(font, 'Confidence', '${(confidence * 100).toStringAsFixed(1)}%'),
             if (rawText != null && rawText.isNotEmpty)
@@ -964,21 +964,6 @@ class PdfService {
     ) ?? '';
   }
 
-  /// 테스트용 PDF 생성 (번호판 섹션 포함)
-  Future<String?> generateTestPdfWithLicensePlate() async {
-    print('테스트 PDF 생성 시작 (번호판 섹션 포함)...');
-    return await generateDecibelReport(
-      maxDecibel: 85.5,
-      minDecibel: 45.2,
-      avgDecibel: 65.8,
-      startTime: DateTime.now().subtract(const Duration(minutes: 5)),
-      endTime: DateTime.now(),
-      measurementCount: 50,
-      licensePlateNumber: '12가3456',
-      licensePlateConfidence: 0.95,
-      licensePlateRawText: '12가3456 TEST',
-    );
-  }
 
   /// 파일 크기 계산
   String _getFileSize(String filePath) {

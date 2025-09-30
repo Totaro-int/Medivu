@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../models/recording_model.dart';
+import '../../models/report_model.dart';
 import '../../widgets/primary_button.dart';
+import '../../widgets/share_dialog.dart';
 import '../../utils/constants.dart';
 import '../../services/enhanced_database_helper.dart';
 import '../../providers/enhanced_auth_provider.dart';
@@ -36,35 +38,45 @@ class _VideoListScreenState extends State<VideoListScreen> {
       final authProvider = Provider.of<EnhancedAuthProvider>(context, listen: false);
       final userId = authProvider.userId;
       
-      print('🔍 동영상 목록 로드 시작');
-      print('  - 로그인 상태: ${authProvider.isLoggedIn}');
-      print('  - 현재 사용자: ${authProvider.currentUser}');
-      print('  - 사용자 ID: $userId');
-      print('  - 사용자 ID 타입: ${userId.runtimeType}');
-      
+      debugPrint('🔍 동영상 목록 로드 시작');
+      debugPrint('  - 로그인 상태: ${authProvider.isLoggedIn}');
+      debugPrint('  - 현재 사용자: ${authProvider.currentUser}');
+      debugPrint('  - 사용자 ID: $userId');
+      debugPrint('  - 사용자 ID 타입: ${userId.runtimeType}');
+
       if (userId == null) {
         throw Exception('로그인된 사용자가 없습니다.');
       }
-      
+
       // 실제 DB에서 해당 사용자의 녹화 데이터 조회 - EnhancedDatabaseHelper 직접 사용
-      print('  - DB에서 사용자 녹화 데이터 조회 시작...');
+      debugPrint('  - DB에서 사용자 녹화 데이터 조회 시작...');
       final numericUserId = int.tryParse(userId) ?? 1;
+      debugPrint('  - 변환된 숫자 userId: $numericUserId');
       final recordings = await EnhancedDatabaseHelper.instance.getUserSessions(numericUserId);
-      
-      print('  - 조회된 녹화 데이터 개수: ${recordings.length}');
+
+      debugPrint('  - 조회된 녹화 데이터 개수: ${recordings.length}');
+      if (recordings.isEmpty) {
+        debugPrint('  ⚠️ 녹화 데이터가 없습니다. 녹화를 진행해주세요.');
+      }
       
       setState(() {
         _videos = recordings;
         _sortVideos();
         _isLoading = false;
       });
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('❌ 동영상 목록 로드 실패: $e');
+      debugPrint('스택 트레이스:\n$stackTrace');
       setState(() {
         _isLoading = false;
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('비디오 로딩 실패: $e')),
+          SnackBar(
+            content: Text('녹화 데이터가 없습니다.\n녹화를 먼저 진행해주세요.'),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 4),
+          ),
         );
       }
     }
@@ -593,10 +605,29 @@ class _VideoListScreenState extends State<VideoListScreen> {
   }
 
   void _shareVideo(RecordingModel video) {
-    // TODO: 비디오 공유 기능 구현
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('공유 기능이 준비 중입니다.')),
-    );
+    if (video.videoPath != null && video.videoPath!.isNotEmpty) {
+      // 비디오 공유를 위한 임시 ReportModel 생성
+      final tempReport = ReportModel(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        title: '소음 측정 비디오',
+        description: '비디오 파일: ${video.videoPath}',
+        recording: video,
+        createdAt: DateTime.now(),
+        userId: video.userId,
+        status: ReportStatus.ready,
+      );
+
+      showDialog(
+        context: context,
+        builder: (context) => ShareDialog(
+          report: tempReport,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('공유할 비디오 파일이 없습니다.')),
+      );
+    }
   }
 
   void _generateReport(RecordingModel video) {

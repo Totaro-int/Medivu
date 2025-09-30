@@ -13,8 +13,8 @@ import 'screens/home/video_list_screen.dart'; // 비디오 목록 화면 import
 import 'screens/report/report_screen.dart'; // 리포트 화면 import
 import 'screens/report/report_list_screen.dart'; // 리포트 목록 화면 import
 import 'screens/complaint/noise_complaint_screen.dart'; // 소음 신고 화면 import
-import 'screens/ocr/ocr_test_screen.dart'; // OCR 테스트 화면 import
-import 'screens/test/korean_ocr_test_screen.dart'; // 한글 OCR 테스트 화면 import
+// import 'screens/ocr/ocr_test_screen.dart'; // OCR 테스트 화면 제거
+// import 'screens/test/korean_ocr_test_screen.dart'; // 한글 OCR 테스트 화면 제거
 // 데이터베이스 관련
 import 'services/enhanced_database_helper.dart';
 import 'utils/database_debug.dart';
@@ -29,7 +29,9 @@ void main() async {
   
   // 디버그 모드에서 데이터베이스 정보 출력
   await DatabaseDebug.printDatabaseInfo();
-  
+  await DatabaseDebug.printUserData();
+  await DatabaseDebug.printSessionData();
+
   runApp(const MyApp());
 }
 
@@ -63,8 +65,8 @@ class MyApp extends StatelessWidget {
         '/videoList': (context) => const VideoListScreen(), // ✅ 비디오 목록 화면
         '/reportList': (context) => const ReportListScreen(), // ✅ 리포트 목록 화면
         '/complaint': (context) => const NoiseComplaintScreen(), // ✅ 소음 신고 화면
-        '/ocr-test': (context) => const OcrTestScreen(), // ✅ OCR 테스트 화면
-        '/korean-ocr-test': (context) => const KoreanOCRTestScreen(), // ✅ 한글 OCR 테스트 화면
+        // '/ocr-test': (context) => const OcrTestScreen(), // OCR 테스트 화면 제거
+        // '/korean-ocr-test': (context) => const KoreanOCRTestScreen(), // 한글 OCR 테스트 화면 제거
       },
 
       //동적 라우트 (예: 상세 페이지 등)
