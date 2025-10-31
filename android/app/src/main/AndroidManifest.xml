@@ -10,14 +10,14 @@
     <!-- 위치 권한 -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <!-- ACCESS_BACKGROUND_LOCATION: 백그라운드 위치 추적 안 함으로 제거 -->
     
     <!-- 저장소 권한 -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
-    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <!-- READ_MEDIA_AUDIO: 앱에서 오디오 파일 접근 안 함으로 제거 -->
     
     <!-- 네트워크 권한 -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -25,8 +25,8 @@
     
     <!-- 앱 안정성을 위한 추가 권한 -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <!-- FOREGROUND_SERVICE: 포그라운드 서비스 미사용으로 제거 -->
+    <!-- REQUEST_IGNORE_BATTERY_OPTIMIZATIONS: 배터리 최적화 제외 불필요로 제거 -->
     
     <application
         android:label="noise0"
